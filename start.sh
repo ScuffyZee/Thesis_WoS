@@ -1,4 +1,5 @@
 ﻿#!/bin/sh
+
 set -e
 
 cd /var/www
@@ -19,30 +20,27 @@ if [ "${DB_CONNECTION:-}" != "pgsql" ]; then
 fi
 
 echo "==> Clearing Laravel configuration cache..."
-
 php artisan config:clear
 php artisan cache:clear || true
 
 echo "==> Running database migrations..."
-
 php artisan migrate --force --no-interaction
 
-echo "==> Creating storage link..."
+echo "==> Seeding application user..."
+php artisan db:seed --class=UserSeeder --force --no-interaction
 
+echo "==> Creating storage link..."
 php artisan storage:link 2>/dev/null || true
 
 echo "==> Setting permissions..."
-
 chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
 echo "==> Starting PHP-FPM..."
-
 mkdir -p /run/php
 php-fpm -D
 
 sleep 2
 
 echo "==> Starting Nginx..."
-
 exec nginx -g "daemon off;"
