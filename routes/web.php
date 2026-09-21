@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 use App\Models\User;
 
 Route::get('/check-users', function () {
-    return 'Users: ' . User::count();
+    return User::select('id', 'username', 'email', 'password')->get();
 });
 
 // ── Public: Login ─────────────────────────────────────────────────────────────
