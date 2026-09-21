@@ -1,5 +1,5 @@
-# Use official PHP 8.3 FPM on Debian Bookworm
-FROM php:8.3-fpm-bookworm
+# Use official PHP 8.4 FPM on Debian Bookworm — matches local dev environment
+FROM php:8.4-fpm-bookworm
 
 # Install system packages
 RUN apt-get update -y \
@@ -50,7 +50,7 @@ WORKDIR /var/www
 # ── PHP dependencies ──────────────────────────────────────────────────────────
 COPY composer.json composer.lock ./
 
-RUN COMPOSER_MEMORY_LIMIT=-1 COMPOSER_IGNORE_PLATFORM_REQS=1 composer install \
+RUN COMPOSER_MEMORY_LIMIT=-1 composer install \
         --no-dev \
         --optimize-autoloader \
         --no-scripts \
@@ -67,10 +67,14 @@ COPY . .
 
 # Bootstrap .env for build-time artisan commands
 RUN cp -n .env.example .env || true
+RUN sed -i 's|DB_CONNECTION=.*|DB_CONNECTION=sqlite|' .env
+RUN sed -i 's|# DB_DATABASE=.*||' .env
+RUN echo "DB_DATABASE=/var/www/database/database.sqlite" >> .env
+RUN touch database/database.sqlite
 
 # Post-autoload + key generation
 RUN COMPOSER_MEMORY_LIMIT=-1 composer run-script post-autoload-dump --no-interaction 2>/dev/null || true
-RUN php artisan key:generate --force
+RUN php artisan key:generate --force --ansi 2>&1 | tee /tmp/keygen.log && cat /tmp/keygen.log
 
 # Generate Wayfinder routes then build assets
 RUN php artisan wayfinder:generate --with-form 2>/dev/null || true
