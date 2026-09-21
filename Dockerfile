@@ -95,7 +95,7 @@ RUN printf '#!/bin/sh\nset -e\n\ncd /var/www\n\n' > /start.sh \
     && printf 'echo "==> Writing .env..."\n' >> /start.sh \
     && printf 'APP_KEY_CLEAN=$(printf "%%s" "$APP_KEY" | tr -d "\\r\\n")\n' >> /start.sh \
     && printf 'APP_URL_CLEAN=$(printf "%%s" "${APP_URL:-https://thesis-wos.onrender.com}" | tr -d "\\r\\n")\n' >> /start.sh \
-    && printf 'printf "APP_NAME=MISO WOS\\n" > .env\n' >> /start.sh \
+    && printf 'printf "APP_NAME=\"MISO WOS\"\\n" > .env\n' >> /start.sh \
     && printf 'printf "APP_ENV=production\\n" >> .env\n' >> /start.sh \
     && printf 'printf "APP_KEY=%%s\\n" "$APP_KEY_CLEAN" >> .env\n' >> /start.sh \
     && printf 'printf "APP_DEBUG=false\\n" >> .env\n' >> /start.sh \
