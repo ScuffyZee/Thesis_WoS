@@ -6,12 +6,24 @@ use App\Http\Controllers\PublicRequestController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkOrderController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 
-Route::get('/check-users', function () {
-    return User::select('id', 'username', 'email', 'password')
-        ->get()
-        ->makeVisible('password'); // bypasses $hidden just for this call
+Route::get('/check-password', function () {
+    $user = User::where('username', 'zidane')->first();
+
+    if (!$user) {
+        return 'USER NOT FOUND';
+    }
+
+    return [
+        'username' => $user->username,
+        'email' => $user->email,
+        'password_matches' => Hash::check(
+            '123456789',
+            $user->password
+        ),
+    ];
 });
 // ── Public: Login ─────────────────────────────────────────────────────────────
 

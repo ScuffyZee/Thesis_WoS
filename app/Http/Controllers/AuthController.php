@@ -5,16 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class AuthController extends Controller
 {
-    /**
-     * Show the login page.
-     * If already logged in, redirect straight to dashboard.
-     */
     public function showLogin(): Response|RedirectResponse
     {
         if (Auth::check()) {
@@ -24,38 +20,29 @@ class AuthController extends Controller
         return Inertia::render('welcome');
     }
 
-    /**
-     * Attempt login by username (looks up email, then authenticates).
-     */
     public function login(Request $request): RedirectResponse
-{
-    $request->validate([
-        'username' => ['required', 'string'],
-        'password' => ['required', 'string'],
-    ]);
+    {
+        $request->validate([
+            'username' => ['required', 'string'],
+            'password' => ['required', 'string'],
+        ]);
 
-    $user = User::where('username', $request->username)->first();
+        $user = User::where('username', $request->username)->first();
 
-    if (!$user) {
-        return back()->withErrors([
-            'username' => 'DEBUG: User not found.',
-        ])->onlyInput('username');
+        if (! $user || ! Auth::attempt(
+            ['email' => $user->email, 'password' => $request->password],
+            $request->boolean('remember'),
+        )) {
+            return back()->withErrors([
+                'username' => 'Invalid username or password.',
+            ])->onlyInput('username');
+        }
+
+        $request->session()->regenerate();
+
+        return redirect()->route('dashboard');
     }
 
-    $passwordMatches = Hash::check(
-        $request->password,
-        $user->password
-    );
-
-    return back()->withErrors([
-        'username' => 'DEBUG: User found. Password matches: '
-            . ($passwordMatches ? 'YES' : 'NO'),
-    ])->onlyInput('username');
-}
-
-    /**
-     * Log out and return to login page.
-     */
     public function logout(Request $request): RedirectResponse
     {
         Auth::logout();
