@@ -85,9 +85,11 @@ RUN chown -R www-data:www-data /var/www \
     && chmod -R 775 /var/www/storage \
     && chmod -R 775 /var/www/bootstrap/cache
 
-# Nginx config — place in conf.d so it's included inside the existing http block
-COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
-RUN rm -f /etc/nginx/sites-enabled/default /etc/nginx/conf.d/default 2>/dev/null || true
+# Nginx config — write main nginx.conf and our server block from scratch
+RUN mkdir -p /etc/nginx/conf.d \
+    && printf 'worker_processes auto;\npid /tmp/nginx.pid;\nerror_log /dev/stderr warn;\nevents { worker_connections 1024; }\nhttp {\n    include /etc/nginx/mime.types;\n    default_type application/octet-stream;\n    sendfile on;\n    keepalive_timeout 65;\n    access_log /dev/stdout;\n    client_body_temp_path /tmp/client_body;\n    proxy_temp_path /tmp/proxy;\n    fastcgi_temp_path /tmp/fastcgi;\n    include /etc/nginx/conf.d/*.conf;\n}\n' > /etc/nginx/nginx.conf \
+    && printf 'server {\n    listen 10000 default_server;\n    root /var/www/public;\n    index index.php;\n    location /build/ { try_files $uri =404; expires 1y; add_header Cache-Control "public, immutable"; }\n    location /storage/ { try_files $uri =404; }\n    location / { try_files $uri $uri/ /index.php?$query_string; }\n    location ~ \\.php$ { fastcgi_pass 127.0.0.1:9000; fastcgi_index index.php; fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; include fastcgi_params; fastcgi_read_timeout 300; }\n    location ~ /\\.ht { deny all; }\n}\n' > /etc/nginx/conf.d/app.conf \
+    && nginx -t
 
 # Write start.sh directly in the image to avoid Windows CRLF issues
 RUN printf '#!/bin/sh\nset -e\n\ncd /var/www\n\n' > /start.sh \
