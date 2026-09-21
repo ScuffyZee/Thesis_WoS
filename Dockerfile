@@ -1,4 +1,4 @@
-FROM php:8.3-fpm-alpine
+FROM php:8.3-cli-alpine
 
 # Install system dependencies
 RUN apk add --no-cache \
@@ -14,43 +14,47 @@ RUN apk add --no-cache \
     oniguruma-dev \
     libpng-dev \
     libzip-dev \
-    icu-dev
+    icu-dev \
+    freetype-dev \
+    libjpeg-turbo-dev
 
 # Install PHP extensions
-RUN docker-php-ext-install \
-    pdo \
-    pdo_sqlite \
-    mbstring \
-    zip \
-    gd \
-    intl \
-    opcache
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+        pdo \
+        pdo_sqlite \
+        mbstring \
+        zip \
+        gd \
+        intl \
+        opcache \
+        pcntl
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Set working directory
 WORKDIR /var/www
 
-# Copy composer files first (for layer caching)
+# Copy composer files and install PHP deps first (layer cache)
 COPY composer.json composer.lock ./
+RUN composer install \
+        --no-dev \
+        --optimize-autoloader \
+        --no-scripts \
+        --no-interaction \
+        --prefer-dist
 
-# Install PHP dependencies (no dev)
-RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
-
-# Copy package files
+# Copy package files and install Node deps
 COPY package.json package-lock.json ./
+RUN npm ci --prefer-offline
 
-# Install Node dependencies
-RUN npm ci
-
-# Copy the rest of the application
+# Copy full application source
 COPY . .
 
-# Run composer scripts now that full app is present
-RUN composer run-script post-autoload-dump || true
+# Run post-install composer scripts (package discovery etc.)
+RUN composer run-script post-autoload-dump --no-interaction 2>/dev/null || true
 
-# Build frontend assets (VERCEL=0 ensures wayfinder runs if php is available)
+# Generate Wayfinder types then build frontend
 RUN php artisan wayfinder:generate --with-form 2>/dev/null || true
 RUN npm run build
 
@@ -59,10 +63,8 @@ RUN chown -R www-data:www-data /var/www \
     && chmod -R 755 /var/www/storage \
     && chmod -R 755 /var/www/bootstrap/cache
 
-# Copy nginx config
+# Nginx + startup
 COPY docker/nginx.conf /etc/nginx/nginx.conf
-
-# Copy startup script
 COPY docker/start.sh /start.sh
 RUN chmod +x /start.sh
 
