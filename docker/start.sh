@@ -3,33 +3,29 @@ set -e
 
 cd /var/www
 
-# Ensure SQLite database exists
+echo "==> Setting up database..."
 mkdir -p database
 touch database/database.sqlite
 
-# Generate app key if not set
+echo "==> Generating app key..."
 php artisan key:generate --force 2>/dev/null || true
 
-# Run migrations
+echo "==> Running migrations..."
 php artisan migrate --force
 
-# Storage symlink
+echo "==> Creating storage link..."
 php artisan storage:link 2>/dev/null || true
 
-# Cache for production
+echo "==> Caching config/routes/views..."
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-# Start PHP-FPM
+echo "==> Starting PHP-FPM..."
 mkdir -p /run/php
-php-fpm8.3 -D 2>/dev/null || php-fpm -D
+php-fpm -D
 
-sleep 1
+sleep 2
 
-# Disable default nginx site and use ours
-rm -f /etc/nginx/sites-enabled/default
-ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
-
-# Start Nginx
+echo "==> Starting Nginx..."
 exec nginx -g "daemon off;"
