@@ -9,24 +9,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 
-Route::get('/reset-test-password', function () {
-    $user = User::where('username', 'zidane')->first();
-
-    if (!$user) {
-        return 'USER NOT FOUND';
-    }
-
-    $user->password = Hash::make('123456789');
-    $user->save();
-
-    return [
-        'username' => $user->username,
-        'password_matches' => Hash::check(
-            '123456789',
-            $user->password
-        ),
-    ];
-});
 // ── Public: Login ─────────────────────────────────────────────────────────────
 
 Route::get('/', [AuthController::class, 'showLogin'])->name('login');
