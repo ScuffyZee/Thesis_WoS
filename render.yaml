@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: thesis-wos
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    port: 10000
+    envVars:
+      - key: APP_NAME
+        value: "MISO WOS"
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_URL
+        fromService:
+          type: web
+          name: thesis-wos
+          property: host
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: SESSION_DRIVER
+        value: cookie
+      - key: CACHE_STORE
+        value: array
+      - key: LOG_CHANNEL
+        value: stderr
