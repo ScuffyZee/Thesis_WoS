@@ -6,6 +6,11 @@ use App\Http\Controllers\PublicRequestController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkOrderController;
 use Illuminate\Support\Facades\Route;
+use App\Models\User;
+
+Route::get('/check-users', function () {
+    return 'Users: ' . User::count();
+});
 
 // ── Public: Login ─────────────────────────────────────────────────────────────
 
