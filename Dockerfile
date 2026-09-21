@@ -90,9 +90,40 @@ COPY docker/nginx.conf /etc/nginx/sites-available/thesis_wos
 RUN ln -sf /etc/nginx/sites-available/thesis_wos /etc/nginx/sites-enabled/thesis_wos \
     && rm -f /etc/nginx/sites-enabled/default
 
-COPY docker/start.sh /start.sh
-# Strip any Windows CR characters that may have survived git checkout
-RUN sed -i 's/\r//' /start.sh && chmod +x /start.sh
+# Write start.sh directly in the image to avoid Windows CRLF issues
+RUN printf '#!/bin/sh\nset -e\n\ncd /var/www\n\n' > /start.sh \
+    && printf 'echo "==> Writing .env..."\n' >> /start.sh \
+    && printf 'printf "APP_NAME=MISO WOS\\n" > .env\n' >> /start.sh \
+    && printf 'printf "APP_ENV=production\\n" >> .env\n' >> /start.sh \
+    && printf 'printf "APP_KEY=${APP_KEY}\\n" >> .env\n' >> /start.sh \
+    && printf 'printf "APP_DEBUG=false\\n" >> .env\n' >> /start.sh \
+    && printf 'printf "APP_URL=${APP_URL:-https://thesis-wos.onrender.com}\\n" >> .env\n' >> /start.sh \
+    && printf 'printf "LOG_CHANNEL=stderr\\n" >> .env\n' >> /start.sh \
+    && printf 'printf "LOG_LEVEL=error\\n" >> .env\n' >> /start.sh \
+    && printf 'printf "DB_CONNECTION=sqlite\\n" >> .env\n' >> /start.sh \
+    && printf 'printf "DB_DATABASE=/var/www/database/database.sqlite\\n" >> .env\n' >> /start.sh \
+    && printf 'printf "SESSION_DRIVER=cookie\\n" >> .env\n' >> /start.sh \
+    && printf 'printf "CACHE_STORE=array\\n" >> .env\n' >> /start.sh \
+    && printf 'printf "QUEUE_CONNECTION=sync\\n" >> .env\n' >> /start.sh \
+    && printf 'printf "FILESYSTEM_DISK=local\\n" >> .env\n' >> /start.sh \
+    && printf 'echo "==> Setting up database..."\n' >> /start.sh \
+    && printf 'mkdir -p /var/www/database\n' >> /start.sh \
+    && printf 'touch /var/www/database/database.sqlite\n' >> /start.sh \
+    && printf 'echo "==> Clearing cache..."\n' >> /start.sh \
+    && printf 'php artisan config:clear 2>/dev/null || true\n' >> /start.sh \
+    && printf 'echo "==> Running migrations..."\n' >> /start.sh \
+    && printf 'php artisan migrate --force\n' >> /start.sh \
+    && printf 'echo "==> Storage link..."\n' >> /start.sh \
+    && printf 'php artisan storage:link 2>/dev/null || true\n' >> /start.sh \
+    && printf 'chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache\n' >> /start.sh \
+    && printf 'chmod -R 775 /var/www/storage /var/www/bootstrap/cache\n' >> /start.sh \
+    && printf 'echo "==> Starting PHP-FPM..."\n' >> /start.sh \
+    && printf 'mkdir -p /run/php\n' >> /start.sh \
+    && printf 'php-fpm -D\n' >> /start.sh \
+    && printf 'sleep 2\n' >> /start.sh \
+    && printf 'echo "==> Starting Nginx..."\n' >> /start.sh \
+    && printf 'exec nginx -g "daemon off;"\n' >> /start.sh \
+    && chmod +x /start.sh
 
 EXPOSE 10000
 
