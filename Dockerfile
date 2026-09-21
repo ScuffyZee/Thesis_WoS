@@ -50,8 +50,7 @@ WORKDIR /var/www
 # ── PHP dependencies ──────────────────────────────────────────────────────────
 COPY composer.json composer.lock ./
 
-# Install with ignore-platform-reqs as a safety net; verbose for Render logs
-RUN COMPOSER_MEMORY_LIMIT=-1 composer install \
+RUN COMPOSER_MEMORY_LIMIT=-1 COMPOSER_IGNORE_PLATFORM_REQS=1 composer install \
         --no-dev \
         --optimize-autoloader \
         --no-scripts \
