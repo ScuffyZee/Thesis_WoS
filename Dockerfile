@@ -76,6 +76,10 @@ RUN touch database/database.sqlite
 RUN COMPOSER_MEMORY_LIMIT=-1 composer run-script post-autoload-dump --no-interaction 2>/dev/null || true
 RUN php artisan key:generate --force --ansi 2>&1 | tee /tmp/keygen.log && cat /tmp/keygen.log
 
+# Run migrations at build time — clean environment, no Render interference
+RUN php artisan migrate --force --no-interaction && echo "Migrations OK" \
+    && cp database/database.sqlite database/database.sqlite.bak
+
 # Generate Wayfinder routes then build assets
 RUN php artisan wayfinder:generate --with-form 2>/dev/null || true
 RUN npm run build && echo "Vite build succeeded"
@@ -115,7 +119,8 @@ RUN printf '#!/bin/sh\nset -e\n\ncd /var/www\n\n' > /start.sh \
     && printf '} > .env\n' >> /start.sh \
     && printf 'echo "==> Setting up database..."\n' >> /start.sh \
     && printf 'mkdir -p /var/www/database\n' >> /start.sh \
-    && printf 'touch /var/www/database/database.sqlite\n' >> /start.sh \
+    && printf 'cp /var/www/database/database.sqlite.bak /var/www/database/database.sqlite 2>/dev/null || touch /var/www/database/database.sqlite\n' >> /start.sh \
+    && printf 'chown www-data:www-data /var/www/database/database.sqlite\n' >> /start.sh \
     && printf 'echo "==> Clearing cache..."\n' >> /start.sh \
     && printf 'rm -f /var/www/bootstrap/cache/config.php\n' >> /start.sh \
     && printf 'rm -f /var/www/bootstrap/cache/routes*.php\n' >> /start.sh \
@@ -123,15 +128,15 @@ RUN printf '#!/bin/sh\nset -e\n\ncd /var/www\n\n' > /start.sh \
     && printf 'rm -f /var/www/bootstrap/cache/packages.php\n' >> /start.sh \
     && printf 'echo "==> .env contents:"\n' >> /start.sh \
     && printf 'cat -A .env\n' >> /start.sh \
-    && printf 'echo "==> Running migrations..."\n' >> /start.sh \
-    && printf 'unset REQUEST_URI HTTP_HOST SERVER_NAME SERVER_PORT HTTPS\n' >> /start.sh \
-    && printf 'export SERVER_NAME=localhost\n' >> /start.sh \
-    && printf 'export SERVER_PORT=80\n' >> /start.sh \
-    && printf 'export HTTP_HOST=localhost\n' >> /start.sh \
-    && printf 'php artisan migrate --force --no-interaction\n' >> /start.sh \
     && printf 'echo "==> Storage link..."\n' >> /start.sh \
-    && printf 'unset REQUEST_URI HTTP_HOST SERVER_NAME SERVER_PORT\n' >> /start.sh \
     && printf 'php artisan storage:link 2>/dev/null || true\n' >> /start.sh \
+    && printf 'echo "==> Seeding users if empty..."\n' >> /start.sh \
+    && printf 'USER_COUNT=$(sqlite3 /var/www/database/database.sqlite "SELECT COUNT(*) FROM users;" 2>/dev/null || echo 0)\n' >> /start.sh \
+    && printf 'echo "User count: $USER_COUNT"\n' >> /start.sh \
+    && printf 'if [ "$USER_COUNT" = "0" ]; then\n' >> /start.sh \
+    && printf '  echo "==> Seeding initial users..."\n' >> /start.sh \
+    && printf '  unset REQUEST_URI; php artisan db:seed --class=UserSeeder --force 2>&1 || true\n' >> /start.sh \
+    && printf 'fi\n' >> /start.sh \
     && printf 'chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache\n' >> /start.sh \
     && printf 'chmod -R 775 /var/www/storage /var/www/bootstrap/cache\n' >> /start.sh \
     && printf 'echo "==> Starting PHP-FPM..."\n' >> /start.sh \
