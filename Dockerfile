@@ -116,7 +116,10 @@ RUN printf '#!/bin/sh\nset -e\n\ncd /var/www\n\n' > /start.sh \
     && printf 'mkdir -p /var/www/database\n' >> /start.sh \
     && printf 'touch /var/www/database/database.sqlite\n' >> /start.sh \
     && printf 'echo "==> Clearing cache..."\n' >> /start.sh \
-    && printf 'php artisan config:clear 2>/dev/null || true\n' >> /start.sh \
+    && printf 'rm -f /var/www/bootstrap/cache/config.php\n' >> /start.sh \
+    && printf 'rm -f /var/www/bootstrap/cache/routes*.php\n' >> /start.sh \
+    && printf 'rm -f /var/www/bootstrap/cache/services.php\n' >> /start.sh \
+    && printf 'rm -f /var/www/bootstrap/cache/packages.php\n' >> /start.sh \
     && printf 'echo "==> Running migrations..."\n' >> /start.sh \
     && printf 'php artisan migrate --force\n' >> /start.sh \
     && printf 'echo "==> Storage link..."\n' >> /start.sh \
