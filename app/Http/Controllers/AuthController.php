@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -38,12 +38,18 @@ class AuthController extends Controller
 
     if (!$user) {
         return back()->withErrors([
-            'username' => 'DEBUG: Username was not found.',
+            'username' => 'DEBUG: User not found.',
         ])->onlyInput('username');
     }
 
+    $passwordMatches = Hash::check(
+        $request->password,
+        $user->password
+    );
+
     return back()->withErrors([
-        'username' => 'DEBUG: User found. Email: ' . $user->email,
+        'username' => 'DEBUG: User found. Password matches: '
+            . ($passwordMatches ? 'YES' : 'NO'),
     ])->onlyInput('username');
 }
 
