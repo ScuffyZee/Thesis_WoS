@@ -1,4 +1,4 @@
-# Use official PHP 8.4 FPM on Debian Bookworm — matches local dev environment
+﻿# Use official PHP 8.4 FPM on Debian Bookworm â€” matches local dev environment
 FROM php:8.4-fpm-bookworm
 
 # Install system packages
@@ -47,7 +47,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-# ── PHP dependencies ──────────────────────────────────────────────────────────
+# â”€â”€ PHP dependencies â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 COPY composer.json composer.lock ./
 
 RUN COMPOSER_MEMORY_LIMIT=-1 composer install \
@@ -58,11 +58,11 @@ RUN COMPOSER_MEMORY_LIMIT=-1 composer install \
         --prefer-dist \
     && echo "Composer install succeeded"
 
-# ── Node dependencies ─────────────────────────────────────────────────────────
+# â”€â”€ Node dependencies â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 COPY package.json package-lock.json ./
 RUN npm ci && echo "npm ci succeeded"
 
-# ── Application source ────────────────────────────────────────────────────────
+# â”€â”€ Application source â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 COPY . .
 
 # Bootstrap .env for build-time artisan commands
