@@ -28,28 +28,24 @@ class AuthController extends Controller
      * Attempt login by username (looks up email, then authenticates).
      */
     public function login(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'username' => ['required', 'string'],
-            'password' => ['required', 'string'],
-        ]);
+{
+    $request->validate([
+        'username' => ['required', 'string'],
+        'password' => ['required', 'string'],
+    ]);
 
-        // Find user by username field
-        $user = User::where('username', $request->username)->first();
+    $user = User::where('username', $request->username)->first();
 
-        if (! $user || ! Auth::attempt(
-            ['email' => $user->email, 'password' => $request->password],
-            $request->boolean('remember'),
-        )) {
-            return back()->withErrors([
-                'username' => 'Invalid username or password.',
-            ])->onlyInput('username');
-        }
-
-        $request->session()->regenerate();
-
-        return redirect()->route('dashboard');
+    if (!$user) {
+        return back()->withErrors([
+            'username' => 'DEBUG: Username was not found.',
+        ])->onlyInput('username');
     }
+
+    return back()->withErrors([
+        'username' => 'DEBUG: User found. Email: ' . $user->email,
+    ])->onlyInput('username');
+}
 
     /**
      * Log out and return to login page.
