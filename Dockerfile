@@ -51,8 +51,14 @@ RUN npm ci --prefer-offline
 # Copy full application source
 COPY . .
 
+# Create .env from example if not present (Render injects real env vars at runtime)
+RUN cp -n .env.example .env || true
+
 # Run post-install composer scripts (package discovery etc.)
 RUN composer run-script post-autoload-dump --no-interaction 2>/dev/null || true
+
+# Generate a temporary app key for build-time artisan commands
+RUN php artisan key:generate --force
 
 # Generate Wayfinder types then build frontend
 RUN php artisan wayfinder:generate --with-form 2>/dev/null || true
