@@ -7,7 +7,28 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkOrderController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+
+Route::get('/test-auth', function () {
+    $user = User::where('username', 'zidane')->first();
+
+    if (!$user) {
+        return 'USER NOT FOUND';
+    }
+
+    $result = Auth::attempt([
+        'email' => $user->email,
+        'password' => '123456789',
+    ]);
+
+    return [
+        'user_found' => true,
+        'username' => $user->username,
+        'email' => $user->email,
+        'auth_attempt' => $result,
+    ];
+});
 
 // ── Public: Login ─────────────────────────────────────────────────────────────
 
