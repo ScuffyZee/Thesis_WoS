@@ -9,16 +9,18 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 
-Route::get('/check-password', function () {
+Route::get('/reset-test-password', function () {
     $user = User::where('username', 'zidane')->first();
 
     if (!$user) {
         return 'USER NOT FOUND';
     }
 
+    $user->password = Hash::make('123456789');
+    $user->save();
+
     return [
         'username' => $user->username,
-        'email' => $user->email,
         'password_matches' => Hash::check(
             '123456789',
             $user->password
