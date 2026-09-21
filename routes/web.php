@@ -17,16 +17,38 @@ Route::get('/test-auth', function () {
         return 'USER NOT FOUND';
     }
 
-    $result = Auth::attempt([
+    $provider = Auth::getProvider();
+
+    $retrieved = $provider->retrieveByCredentials([
         'email' => $user->email,
-        'password' => '123456789',
     ]);
 
     return [
         'user_found' => true,
-        'username' => $user->username,
+
         'email' => $user->email,
-        'auth_attempt' => $result,
+
+        'model_password' => $user->password,
+
+        'hash_check' => Hash::check(
+            '123456789',
+            $user->password
+        ),
+
+        'provider_found_user' => $retrieved !== null,
+
+        'provider_email' => $retrieved?->email,
+
+        'provider_password' => $retrieved?->password,
+
+        'provider_hash_check' => $retrieved
+            ? Hash::check('123456789', $retrieved->password)
+            : false,
+
+        'auth_attempt' => Auth::attempt([
+            'email' => $user->email,
+            'password' => '123456789',
+        ]),
     ];
 });
 
