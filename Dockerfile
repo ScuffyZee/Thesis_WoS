@@ -123,7 +123,10 @@ RUN printf '#!/bin/sh\nset -e\n\ncd /var/www\n\n' > /start.sh \
     && printf 'echo "==> .env contents:"\n' >> /start.sh \
     && printf 'cat -A .env\n' >> /start.sh \
     && printf 'echo "==> Running migrations..."\n' >> /start.sh \
-    && printf 'unset REQUEST_URI HTTP_HOST SERVER_NAME SERVER_PORT\n' >> /start.sh \
+    && printf 'unset REQUEST_URI HTTP_HOST SERVER_NAME SERVER_PORT HTTPS\n' >> /start.sh \
+    && printf 'export SERVER_NAME=localhost\n' >> /start.sh \
+    && printf 'export SERVER_PORT=80\n' >> /start.sh \
+    && printf 'export HTTP_HOST=localhost\n' >> /start.sh \
     && printf 'php artisan migrate --force --no-interaction\n' >> /start.sh \
     && printf 'echo "==> Storage link..."\n' >> /start.sh \
     && printf 'unset REQUEST_URI HTTP_HOST SERVER_NAME SERVER_PORT\n' >> /start.sh \
