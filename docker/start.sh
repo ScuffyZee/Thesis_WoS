@@ -10,7 +10,7 @@ APP_NAME="${APP_NAME:-MISO WOS}"
 APP_ENV="${APP_ENV:-production}"
 APP_KEY="${APP_KEY}"
 APP_DEBUG="${APP_DEBUG:-false}"
-APP_URL="${APP_URL:-http://localhost}"
+APP_URL="${APP_URL:-https://thesis-wos.onrender.com}"
 
 LOG_CHANNEL=stderr
 LOG_LEVEL=error
@@ -25,6 +25,9 @@ CACHE_STORE=array
 QUEUE_CONNECTION=sync
 
 FILESYSTEM_DISK=local
+
+ASSET_URL="${APP_URL}"
+FORCE_HTTPS=true
 EOF
 
 echo "==> Setting up database..."
