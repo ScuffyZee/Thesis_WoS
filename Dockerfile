@@ -91,7 +91,8 @@ RUN ln -sf /etc/nginx/sites-available/thesis_wos /etc/nginx/sites-enabled/thesis
     && rm -f /etc/nginx/sites-enabled/default
 
 COPY docker/start.sh /start.sh
-RUN chmod +x /start.sh
+# Strip any Windows CR characters that may have survived git checkout
+RUN sed -i 's/\r//' /start.sh && chmod +x /start.sh
 
 EXPOSE 10000
 

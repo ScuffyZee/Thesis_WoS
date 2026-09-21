@@ -4,31 +4,21 @@ set -e
 cd /var/www
 
 echo "==> Writing .env from environment variables..."
-# Build a fresh .env from Render's injected environment variables
-cat > .env << EOF
-APP_NAME="${APP_NAME:-MISO WOS}"
-APP_ENV="${APP_ENV:-production}"
-APP_KEY="${APP_KEY}"
-APP_DEBUG="${APP_DEBUG:-false}"
-APP_URL="${APP_URL:-https://thesis-wos.onrender.com}"
-
-LOG_CHANNEL=stderr
-LOG_LEVEL=error
-
-DB_CONNECTION=sqlite
-DB_DATABASE=/var/www/database/database.sqlite
-
-SESSION_DRIVER=cookie
-SESSION_LIFETIME=120
-
-CACHE_STORE=array
-QUEUE_CONNECTION=sync
-
-FILESYSTEM_DISK=local
-
-ASSET_URL="${APP_URL}"
-FORCE_HTTPS=true
-EOF
+printf 'APP_NAME="%s"\n' "${APP_NAME:-MISO WOS}" > .env
+printf 'APP_ENV="%s"\n' "${APP_ENV:-production}" >> .env
+printf 'APP_KEY="%s"\n' "${APP_KEY}" >> .env
+printf 'APP_DEBUG="%s"\n' "${APP_DEBUG:-false}" >> .env
+printf 'APP_URL="%s"\n' "${APP_URL:-https://thesis-wos.onrender.com}" >> .env
+printf 'LOG_CHANNEL=stderr\n' >> .env
+printf 'LOG_LEVEL=error\n' >> .env
+printf 'DB_CONNECTION=sqlite\n' >> .env
+printf 'DB_DATABASE=/var/www/database/database.sqlite\n' >> .env
+printf 'SESSION_DRIVER=cookie\n' >> .env
+printf 'SESSION_LIFETIME=120\n' >> .env
+printf 'CACHE_STORE=array\n' >> .env
+printf 'QUEUE_CONNECTION=sync\n' >> .env
+printf 'FILESYSTEM_DISK=local\n' >> .env
+printf 'ASSET_URL="%s"\n' "${APP_URL:-https://thesis-wos.onrender.com}" >> .env
 
 echo "==> Setting up database..."
 mkdir -p /var/www/database
