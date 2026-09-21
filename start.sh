@@ -26,9 +26,6 @@ php artisan cache:clear || true
 echo "==> Running database migrations..."
 php artisan migrate --force --no-interaction
 
-echo "==> Seeding application user..."
-php artisan db:seed --class=UserSeeder --force --no-interaction
-
 echo "==> Creating storage link..."
 php artisan storage:link 2>/dev/null || true
 
