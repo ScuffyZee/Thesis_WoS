@@ -3,32 +3,33 @@ set -e
 
 cd /var/www
 
-# Ensure SQLite database file exists
+# Ensure SQLite database exists
 mkdir -p database
 touch database/database.sqlite
 
-# Generate app key if APP_KEY is not set in environment
+# Generate app key if not set
 php artisan key:generate --force 2>/dev/null || true
 
 # Run migrations
 php artisan migrate --force
 
-# Create storage symlink (ignore if already exists)
+# Storage symlink
 php artisan storage:link 2>/dev/null || true
 
-# Cache for production performance
+# Cache for production
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-# Create nginx temp dirs (needed when running as non-root)
-mkdir -p /tmp/client_body /tmp/proxy /tmp/fastcgi /tmp/uwsgi /tmp/scgi
+# Start PHP-FPM
+mkdir -p /run/php
+php-fpm8.3 -D 2>/dev/null || php-fpm -D
 
-# Start PHP-FPM in background
-php-fpm -D -y /usr/local/etc/php-fpm.conf
-
-# Give PHP-FPM a moment to start
 sleep 1
 
-# Start Nginx in foreground (keeps container alive)
+# Disable default nginx site and use ours
+rm -f /etc/nginx/sites-enabled/default
+ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+
+# Start Nginx
 exec nginx -g "daemon off;"

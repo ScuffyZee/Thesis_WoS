@@ -1,25 +1,36 @@
-FROM php:8.3-cli-alpine
+# Use Debian-based image — more compatible than Alpine for PHP packages
+FROM php:8.3-fpm
 
 # Install system dependencies
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     nginx \
-    nodejs \
-    npm \
     curl \
+    git \
     zip \
     unzip \
-    git \
-    sqlite \
-    sqlite-dev \
-    oniguruma-dev \
+    sqlite3 \
+    libsqlite3-dev \
+    libonig-dev \
     libpng-dev \
     libzip-dev \
-    icu-dev \
-    freetype-dev \
-    libjpeg-turbo-dev
+    libicu-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libwebp-dev \
+    libxml2-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+# Install Node.js 20
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean
+
+# Configure and install PHP extensions
+RUN docker-php-ext-configure gd \
+        --with-freetype \
+        --with-jpeg \
+        --with-webp \
     && docker-php-ext-install -j$(nproc) \
         pdo \
         pdo_sqlite \
@@ -28,14 +39,18 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
         gd \
         intl \
         opcache \
-        pcntl
+        pcntl \
+        bcmath \
+        fileinfo \
+        xml \
+        dom
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-# Copy composer files and install PHP deps first (layer cache)
+# Install PHP dependencies (copy lockfile first for layer caching)
 COPY composer.json composer.lock ./
 RUN composer install \
         --no-dev \
@@ -44,33 +59,29 @@ RUN composer install \
         --no-interaction \
         --prefer-dist
 
-# Copy package files and install Node deps
+# Install Node dependencies
 COPY package.json package-lock.json ./
-RUN npm ci --prefer-offline
+RUN npm ci
 
 # Copy full application source
 COPY . .
 
-# Create .env from example if not present (Render injects real env vars at runtime)
+# Bootstrap Laravel for build-time commands
 RUN cp -n .env.example .env || true
-
-# Run post-install composer scripts (package discovery etc.)
 RUN composer run-script post-autoload-dump --no-interaction 2>/dev/null || true
-
-# Generate a temporary app key for build-time artisan commands
 RUN php artisan key:generate --force
 
-# Generate Wayfinder types then build frontend
+# Generate Wayfinder types + build frontend
 RUN php artisan wayfinder:generate --with-form 2>/dev/null || true
 RUN npm run build
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www \
-    && chmod -R 755 /var/www/storage \
-    && chmod -R 755 /var/www/bootstrap/cache
+    && chmod -R 775 /var/www/storage \
+    && chmod -R 775 /var/www/bootstrap/cache
 
-# Nginx + startup
-COPY docker/nginx.conf /etc/nginx/nginx.conf
+# Copy configs
+COPY docker/nginx.conf /etc/nginx/sites-available/default
 COPY docker/start.sh /start.sh
 RUN chmod +x /start.sh
 
