@@ -10,6 +10,14 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
     require $maintenance;
 }
 
+// Sanitize $_SERVER variables that may contain CR/LF characters
+// (injected by some hosting environments like Render.com)
+foreach ($_SERVER as $key => $value) {
+    if (is_string($value)) {
+        $_SERVER[$key] = str_replace(["\r", "\n", "\t"], '', $value);
+    }
+}
+
 // Register the Composer autoloader...
 require __DIR__.'/../vendor/autoload.php';
 
