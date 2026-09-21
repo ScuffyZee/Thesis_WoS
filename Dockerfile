@@ -93,21 +93,25 @@ RUN ln -sf /etc/nginx/sites-available/thesis_wos /etc/nginx/sites-enabled/thesis
 # Write start.sh directly in the image to avoid Windows CRLF issues
 RUN printf '#!/bin/sh\nset -e\n\ncd /var/www\n\n' > /start.sh \
     && printf 'echo "==> Writing .env..."\n' >> /start.sh \
-    && printf 'APP_KEY_CLEAN=$(printf "%%s" "$APP_KEY" | tr -d "\\r\\n")\n' >> /start.sh \
-    && printf 'APP_URL_CLEAN=$(printf "%%s" "${APP_URL:-https://thesis-wos.onrender.com}" | tr -d "\\r\\n")\n' >> /start.sh \
-    && printf 'printf "APP_NAME=\"MISO WOS\"\\n" > .env\n' >> /start.sh \
-    && printf 'printf "APP_ENV=production\\n" >> .env\n' >> /start.sh \
-    && printf 'printf "APP_KEY=%%s\\n" "$APP_KEY_CLEAN" >> .env\n' >> /start.sh \
-    && printf 'printf "APP_DEBUG=false\\n" >> .env\n' >> /start.sh \
-    && printf 'printf "APP_URL=%%s\\n" "$APP_URL_CLEAN" >> .env\n' >> /start.sh \
-    && printf 'printf "LOG_CHANNEL=stderr\\n" >> .env\n' >> /start.sh \
-    && printf 'printf "LOG_LEVEL=error\\n" >> .env\n' >> /start.sh \
-    && printf 'printf "DB_CONNECTION=sqlite\\n" >> .env\n' >> /start.sh \
-    && printf 'printf "DB_DATABASE=/var/www/database/database.sqlite\\n" >> .env\n' >> /start.sh \
-    && printf 'printf "SESSION_DRIVER=cookie\\n" >> .env\n' >> /start.sh \
-    && printf 'printf "CACHE_STORE=array\\n" >> .env\n' >> /start.sh \
-    && printf 'printf "QUEUE_CONNECTION=sync\\n" >> .env\n' >> /start.sh \
-    && printf 'printf "FILESYSTEM_DISK=local\\n" >> .env\n' >> /start.sh \
+    && printf 'APP_KEY_CLEAN=$(printf "%%s" "$APP_KEY" | tr -d "\\r\\n\\t")\n' >> /start.sh \
+    && printf 'APP_URL_CLEAN=$(printf "%%s" "${APP_URL:-https://thesis-wos.onrender.com}" | tr -d "\\r\\n\\t")\n' >> /start.sh \
+    && printf 'APP_NAME_CLEAN=$(printf "%%s" "${APP_NAME:-MISO WOS}" | tr -d "\\r\\n\\t")\n' >> /start.sh \
+    && printf 'APP_ENV_CLEAN=$(printf "%%s" "${APP_ENV:-production}" | tr -d "\\r\\n\\t")\n' >> /start.sh \
+    && printf '{ \n' >> /start.sh \
+    && printf 'printf "APP_NAME=\\"%%s\\"\\n" "$APP_NAME_CLEAN"\n' >> /start.sh \
+    && printf 'printf "APP_ENV=%%s\\n" "$APP_ENV_CLEAN"\n' >> /start.sh \
+    && printf 'printf "APP_KEY=%%s\\n" "$APP_KEY_CLEAN"\n' >> /start.sh \
+    && printf 'printf "APP_DEBUG=false\\n"\n' >> /start.sh \
+    && printf 'printf "APP_URL=%%s\\n" "$APP_URL_CLEAN"\n' >> /start.sh \
+    && printf 'printf "LOG_CHANNEL=stderr\\n"\n' >> /start.sh \
+    && printf 'printf "LOG_LEVEL=error\\n"\n' >> /start.sh \
+    && printf 'printf "DB_CONNECTION=sqlite\\n"\n' >> /start.sh \
+    && printf 'printf "DB_DATABASE=/var/www/database/database.sqlite\\n"\n' >> /start.sh \
+    && printf 'printf "SESSION_DRIVER=cookie\\n"\n' >> /start.sh \
+    && printf 'printf "CACHE_STORE=array\\n"\n' >> /start.sh \
+    && printf 'printf "QUEUE_CONNECTION=sync\\n"\n' >> /start.sh \
+    && printf 'printf "FILESYSTEM_DISK=local\\n"\n' >> /start.sh \
+    && printf '} > .env\n' >> /start.sh \
     && printf 'echo "==> Setting up database..."\n' >> /start.sh \
     && printf 'mkdir -p /var/www/database\n' >> /start.sh \
     && printf 'touch /var/www/database/database.sqlite\n' >> /start.sh \
