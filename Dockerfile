@@ -1,32 +1,32 @@
-# Use Debian-based image — more compatible than Alpine for PHP packages
-FROM php:8.3-fpm
+# Use official PHP 8.3 FPM on Debian Bookworm
+FROM php:8.3-fpm-bookworm
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    nginx \
-    curl \
-    git \
-    zip \
-    unzip \
-    sqlite3 \
-    libsqlite3-dev \
-    libonig-dev \
-    libpng-dev \
-    libzip-dev \
-    libicu-dev \
-    libfreetype6-dev \
-    libjpeg62-turbo-dev \
-    libwebp-dev \
-    libxml2-dev \
-    && apt-get clean \
+# Install system packages
+RUN apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+        nginx \
+        curl \
+        git \
+        zip \
+        unzip \
+        sqlite3 \
+        libsqlite3-dev \
+        libonig-dev \
+        libpng-dev \
+        libzip-dev \
+        libicu-dev \
+        libfreetype6-dev \
+        libjpeg62-turbo-dev \
+        libwebp-dev \
+        libxml2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js 20
+# Install Node.js 20 via NodeSource
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
-    && apt-get clean
+    && rm -rf /var/lib/apt/lists/*
 
-# Configure and install PHP extensions
+# Install PHP extensions
 RUN docker-php-ext-configure gd \
         --with-freetype \
         --with-jpeg \
@@ -40,48 +40,53 @@ RUN docker-php-ext-configure gd \
         intl \
         opcache \
         pcntl \
-        bcmath \
-        fileinfo \
-        xml \
-        dom
+        bcmath
 
-# Install Composer
+# Install Composer 2
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-# Install PHP dependencies (copy lockfile first for layer caching)
+# ── PHP dependencies ──────────────────────────────────────────────────────────
 COPY composer.json composer.lock ./
-RUN composer install \
+
+# Install with ignore-platform-reqs as a safety net; verbose for Render logs
+RUN COMPOSER_MEMORY_LIMIT=-1 composer install \
         --no-dev \
         --optimize-autoloader \
         --no-scripts \
         --no-interaction \
-        --prefer-dist
+        --prefer-dist \
+    && echo "Composer install succeeded"
 
-# Install Node dependencies
+# ── Node dependencies ─────────────────────────────────────────────────────────
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci && echo "npm ci succeeded"
 
-# Copy full application source
+# ── Application source ────────────────────────────────────────────────────────
 COPY . .
 
-# Bootstrap Laravel for build-time commands
+# Bootstrap .env for build-time artisan commands
 RUN cp -n .env.example .env || true
-RUN composer run-script post-autoload-dump --no-interaction 2>/dev/null || true
+
+# Post-autoload + key generation
+RUN COMPOSER_MEMORY_LIMIT=-1 composer run-script post-autoload-dump --no-interaction 2>/dev/null || true
 RUN php artisan key:generate --force
 
-# Generate Wayfinder types + build frontend
+# Generate Wayfinder routes then build assets
 RUN php artisan wayfinder:generate --with-form 2>/dev/null || true
-RUN npm run build
+RUN npm run build && echo "Vite build succeeded"
 
-# Set permissions
+# Permissions
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 775 /var/www/storage \
     && chmod -R 775 /var/www/bootstrap/cache
 
-# Copy configs
-COPY docker/nginx.conf /etc/nginx/sites-available/default
+# Nginx site config
+COPY docker/nginx.conf /etc/nginx/sites-available/thesis_wos
+RUN ln -sf /etc/nginx/sites-available/thesis_wos /etc/nginx/sites-enabled/thesis_wos \
+    && rm -f /etc/nginx/sites-enabled/default
+
 COPY docker/start.sh /start.sh
 RUN chmod +x /start.sh
 
