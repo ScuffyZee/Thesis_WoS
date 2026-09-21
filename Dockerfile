@@ -85,10 +85,8 @@ RUN chown -R www-data:www-data /var/www \
     && chmod -R 775 /var/www/storage \
     && chmod -R 775 /var/www/bootstrap/cache
 
-# Nginx site config
-COPY docker/nginx.conf /etc/nginx/sites-available/thesis_wos
-RUN ln -sf /etc/nginx/sites-available/thesis_wos /etc/nginx/sites-enabled/thesis_wos \
-    && rm -f /etc/nginx/sites-enabled/default
+# Nginx config — use as main nginx.conf to avoid include context issues
+COPY docker/nginx.conf /etc/nginx/nginx.conf
 
 # Write start.sh directly in the image to avoid Windows CRLF issues
 RUN printf '#!/bin/sh\nset -e\n\ncd /var/www\n\n' > /start.sh \
