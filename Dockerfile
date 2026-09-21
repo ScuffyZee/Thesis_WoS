@@ -120,9 +120,13 @@ RUN printf '#!/bin/sh\nset -e\n\ncd /var/www\n\n' > /start.sh \
     && printf 'rm -f /var/www/bootstrap/cache/routes*.php\n' >> /start.sh \
     && printf 'rm -f /var/www/bootstrap/cache/services.php\n' >> /start.sh \
     && printf 'rm -f /var/www/bootstrap/cache/packages.php\n' >> /start.sh \
+    && printf 'echo "==> .env contents:"\n' >> /start.sh \
+    && printf 'cat -A .env\n' >> /start.sh \
     && printf 'echo "==> Running migrations..."\n' >> /start.sh \
-    && printf 'php artisan migrate --force\n' >> /start.sh \
+    && printf 'unset REQUEST_URI HTTP_HOST SERVER_NAME SERVER_PORT\n' >> /start.sh \
+    && printf 'php artisan migrate --force --no-interaction\n' >> /start.sh \
     && printf 'echo "==> Storage link..."\n' >> /start.sh \
+    && printf 'unset REQUEST_URI HTTP_HOST SERVER_NAME SERVER_PORT\n' >> /start.sh \
     && printf 'php artisan storage:link 2>/dev/null || true\n' >> /start.sh \
     && printf 'chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache\n' >> /start.sh \
     && printf 'chmod -R 775 /var/www/storage /var/www/bootstrap/cache\n' >> /start.sh \
