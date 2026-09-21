@@ -7,6 +7,10 @@ import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
 import { defineConfig, lazyPlugins } from 'vite-plus';
 
+// Wayfinder calls `php artisan` during build — skip it on environments
+// where PHP is not available (e.g. Vercel build containers).
+const hasPhp = process.env.VERCEL !== '1';
+
 export default defineConfig({
     plugins: lazyPlugins(() => [
         laravel({
@@ -24,9 +28,7 @@ export default defineConfig({
             presets: [reactCompilerPreset()],
         }),
         tailwindcss(),
-        wayfinder({
-            formVariants: true,
-        }),
+        ...(hasPhp ? [wayfinder({ formVariants: true })] : []),
     ]),
     server: {
         watch: {
