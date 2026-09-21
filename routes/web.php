@@ -9,9 +9,10 @@ use Illuminate\Support\Facades\Route;
 use App\Models\User;
 
 Route::get('/check-users', function () {
-    return User::select('id', 'username', 'email', 'password')->get();
+    return User::select('id', 'username', 'email', 'password')
+        ->get()
+        ->makeVisible('password'); // bypasses $hidden just for this call
 });
-
 // ── Public: Login ─────────────────────────────────────────────────────────────
 
 Route::get('/', [AuthController::class, 'showLogin'])->name('login');
