@@ -161,15 +161,6 @@ export default function PublicRequestForm({ campuses, categories, departments }:
                                     ))}
                                 </select>
                                 <FieldError msg={errors.requestor_department} />
-                                {autoImpact !== null && (
-                                    <p className="mt-1 flex items-center gap-1 text-[10px] text-gray-500">
-                                        <SparkleIcon className="h-3 w-3 text-amber-400" />
-                                        Impact auto-set to{' '}
-                                        <strong className="text-gray-700">
-                                            {autoImpact} — {IMPACT_LABELS[autoImpact]}
-                                        </strong>
-                                    </p>
-                                )}
                             </div>
 
                             <div className="col-span-2 sm:col-span-1">
@@ -265,37 +256,13 @@ export default function PublicRequestForm({ campuses, categories, departments }:
 
                             {/* Live score panel */}
                             {result ? (
-                                <div className={cn(
-                                    'mt-4 rounded-lg border p-4',
-                                    LEVEL_COLORS[result.level].bg,
-                                )}>
-                                    <div className="mb-3 flex items-center justify-between">
-                                        <p className="flex items-center gap-1.5 text-xs font-semibold text-gray-600">
-                                            <SparkleIcon className="h-3.5 w-3.5 text-amber-400" />
-                                            Your request will be assigned:
-                                        </p>
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-mono text-lg font-bold text-gray-800">
-                                                {result.scoreDisplay}
-                                            </span>
-                                            <span className={cn(
-                                                'rounded px-2.5 py-0.5 text-xs font-bold uppercase',
-                                                LEVEL_COLORS[result.level].badge,
-                                            )}>
-                                                {result.levelLabel} Priority
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <ScoreRow label="Urgency"         score={result.urgency}   max={5} level={result.level} />
-                                        <ScoreRow label="Impact (dept.)"  score={result.impact}    max={5} level={result.level} />
-                                        <ScoreRow label="Wait Time Score" score={result.waitScore} max={5} level={result.level} />
-                                    </div>
-
-                                    <p className="mt-2.5 text-[11px] font-mono text-gray-500">
-                                        ({result.urgency} + {result.impact} + {result.waitScore}) / 3 = <strong className="text-gray-800">{result.scoreDisplay}</strong>
-                                    </p>
+                                <div className="mt-4 inline-flex items-center gap-2">
+                                    <span className={cn(
+                                        'rounded px-3 py-1 text-sm font-bold uppercase',
+                                        LEVEL_COLORS[result.level].badge,
+                                    )}>
+                                        {result.levelLabel} Priority
+                                    </span>
                                 </div>
                             ) : (
                                 <div className="mt-4 rounded-lg border border-dashed border-gray-200 bg-gray-50 px-4 py-4 text-center text-xs text-gray-400">

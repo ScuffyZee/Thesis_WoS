@@ -136,12 +136,6 @@ export default function CreateWorkOrder({ campuses, categories, personnel, depar
                                     {departments.map((d) => <option key={d} value={d}>{d}</option>)}
                                 </select>
                                 <FieldError msg={errors.requestor_department} />
-                                {autoImpact !== null && (
-                                    <p className="mt-1 flex items-center gap-1 text-[10px] text-gray-500">
-                                        <SparkleIcon className="h-3 w-3 text-amber-400" />
-                                        Auto-impact: <strong className="text-gray-700">{autoImpact} — {IMPACT_LABELS[autoImpact]}</strong>
-                                    </p>
-                                )}
                             </div>
 
                             <div>
@@ -212,36 +206,10 @@ export default function CreateWorkOrder({ campuses, categories, personnel, depar
 
                             {/* Live score panel */}
                             {result ? (
-                                <div className={cn('mt-4 rounded-lg border p-4 ring-2 border-gray-100 bg-gray-50', LEVEL_COLORS[result.level].ring)}>
-                                    <div className="mb-3 flex items-center justify-between">
-                                        <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                                            <SparkleIcon className="h-3 w-3 text-amber-400" />
-                                            Computed Priority
-                                        </p>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-lg font-bold text-gray-800">{result.scoreDisplay}</span>
-                                            <span className={cn('rounded px-2.5 py-0.5 text-xs font-bold uppercase', LEVEL_COLORS[result.level].badge)}>
-                                                {result.levelLabel}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <ScoreRow label="Urgency"         sublabel={URGENCY_OPTIONS.find(o => o.value === result.urgency)?.label ?? ''} score={result.urgency}   max={5} level={result.level} />
-                                        <ScoreRow label="Impact"          sublabel={`${result.impactLabel} — auto from department`}                      score={result.impact}    max={5} level={result.level} />
-                                        <ScoreRow label="Wait Time Score" sublabel={`${result.estimatedMinutes} min → ${WAIT_TIME_BANDS.find(b => result.estimatedMinutes <= b.max)?.label}`} score={result.waitScore} max={5} level={result.level} />
-                                    </div>
-                                    <div className="mt-3 rounded border border-gray-200 bg-white px-3 py-2 font-mono text-[11px] text-gray-500">
-                                        ({result.urgency} + {result.impact} + {result.waitScore}) / 3 = <strong className="text-gray-800">{result.scoreDisplay}</strong>
-                                        <span className="ml-2">→</span>
-                                        <span className={cn('ml-2 font-bold uppercase',
-                                            result.level === 'critical' ? 'text-red-600'
-                                            : result.level === 'high'   ? 'text-orange-600'
-                                            : result.level === 'medium' ? 'text-yellow-600'
-                                            : 'text-blue-600')}>
-                                            {result.levelLabel}
-                                        </span>
-                                    </div>
-                                    <p className="mt-2 text-[10px] text-gray-400">Priority and wait time are auto-computed and cannot be overridden.</p>
+                                <div className="mt-4 inline-flex items-center gap-2">
+                                    <span className={cn('rounded px-3 py-1 text-sm font-bold uppercase', LEVEL_COLORS[result.level].badge)}>
+                                        {result.levelLabel} Priority
+                                    </span>
                                 </div>
                             ) : (
                                 <div className="mt-4 rounded-lg border border-dashed border-gray-200 bg-gray-50 px-4 py-5 text-center text-xs text-gray-400">
