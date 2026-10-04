@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../wayfinder'
 /**
 * @see \App\Http\Controllers\AuthController::attempt
- * @see app/Http/Controllers/AuthController.php:30
+ * @see app/Http/Controllers/AuthController.php:23
  * @route '/login'
  */
 export const attempt = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ attempt.definition = {
 
 /**
 * @see \App\Http\Controllers\AuthController::attempt
- * @see app/Http/Controllers/AuthController.php:30
+ * @see app/Http/Controllers/AuthController.php:23
  * @route '/login'
  */
 attempt.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ attempt.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\AuthController::attempt
- * @see app/Http/Controllers/AuthController.php:30
+ * @see app/Http/Controllers/AuthController.php:23
  * @route '/login'
  */
 attempt.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -35,7 +35,7 @@ attempt.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
     /**
 * @see \App\Http\Controllers\AuthController::attempt
- * @see app/Http/Controllers/AuthController.php:30
+ * @see app/Http/Controllers/AuthController.php:23
  * @route '/login'
  */
     const attemptForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -45,7 +45,7 @@ attempt.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
             /**
 * @see \App\Http\Controllers\AuthController::attempt
- * @see app/Http/Controllers/AuthController.php:30
+ * @see app/Http/Controllers/AuthController.php:23
  * @route '/login'
  */
         attemptForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

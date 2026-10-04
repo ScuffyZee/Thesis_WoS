@@ -247,7 +247,7 @@ export default function MyProfile({ user }: Props) {
                                     />
                                 </div>
                             </div>
-                            {errors.name && <p className="text-[10px] text-red-500">{errors.name}</p>}
+                            {(errors as Record<string, string>).name && <p className="text-[10px] text-red-500">{(errors as Record<string, string>).name}</p>}
 
                             {/* Email + Phone */}
                             <div className="grid grid-cols-2 gap-4">

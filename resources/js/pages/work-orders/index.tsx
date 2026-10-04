@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/AppLayout';
 import { cn } from '@/lib/utils';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePoll } from '@inertiajs/react';
 import { useCallback, useState } from 'react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -254,6 +254,12 @@ export default function WorkOrdersIndex({
         }, { preserveState: true, replace: true });
     }, [campus, dateFrom, dateTo, priority, search]);
 
+    usePoll(5000, {
+        only: ['pendingOrders', 'activeOrders'],
+        preserveState: true,
+        preserveScroll: true,
+    });
+
     return (
         <>
             <Head title="Work Orders" />
@@ -263,8 +269,12 @@ export default function WorkOrdersIndex({
                 <div className="mb-5 flex items-start justify-between">
                     <div>
                         <h2 className="text-xl font-bold text-gray-800">Work Orders</h2>
-                        <p className="mt-0.5 text-xs text-gray-500">
+                        <p className="mt-0.5 flex items-center gap-2 text-xs text-gray-500">
                             Track, log, and document all technical department work orders.
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                Live
+                            </span>
                         </p>
                     </div>
                     <div className="flex gap-2">
