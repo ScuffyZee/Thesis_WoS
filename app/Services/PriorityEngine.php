@@ -5,10 +5,12 @@ namespace App\Services;
 /**
  * Priority Engine
  *
- * Formula:  Priority Score = (Urgency + Impact + WaitTimeScore) / 3
+ * Formula:  Priority Score = (Urgency × 0.425) + (Impact × 0.425) + (WaitTimeScore × 0.15)
+ *
+ * Weights:  Urgency 42.5% | Impact 42.5% | WaitTime 15%
  *
  * ┌─────────────────────────────────────────────────────────────────────┐
- * │ Urgency (1–6)  — chosen by the requestor                           │
+ * │ Urgency (1–6)  — chosen by the requestor          weight: 42.5%   │
  * │  6  Disrupts ongoing class / exam                                  │
  * │  5  Disrupts a scheduled activity soon                             │
  * │  4  Affects work, time-crucial                                     │
@@ -16,14 +18,14 @@ namespace App\Services;
  * │  2  Minor inconvenience                                            │
  * │  1  No immediate effect                                            │
  * ├─────────────────────────────────────────────────────────────────────┤
- * │ Impact (1–5)  — AUTO-ASSIGNED from department                      │
+ * │ Impact (1–5)  — AUTO-ASSIGNED from department     weight: 42.5%   │
  * │  5  FAO / OOR / MIS Office  (core institutional operations)        │
  * │  4  Admin / HED             (broad operational impact)             │
  * │  3  HRD                     (internal ops, workarounds exist)      │
  * │  2  OSA                     (student services, limited impact)     │
  * │  1  (default for unknown)                                          │
  * ├─────────────────────────────────────────────────────────────────────┤
- * │ WaitTimeScore — derived from estimated minutes to resolve          │
+ * │ WaitTimeScore — derived from estimated minutes    weight: 15%     │
  * │   0–10 min → 1                                                     │
  * │  11–20 min → 2                                                     │
  * │  21–30 min → 3                                                     │
@@ -139,12 +141,14 @@ class PriorityEngine
 
     /**
      * Compute the priority score (2 decimal places).
+     *
+     * Weights: Urgency 42.5% | Impact 42.5% | WaitTime 15%
      */
     public static function score(int $urgency, int $impact, int $estimatedMinutes): float
     {
         $waitScore = self::waitTimeScore($estimatedMinutes);
 
-        return round(($urgency + $impact + $waitScore) / 3, 2);
+        return round(($urgency * 0.425) + ($impact * 0.425) + ($waitScore * 0.15), 2);
     }
 
     /**
@@ -172,7 +176,7 @@ class PriorityEngine
     ): array {
         $impact    = self::impactFromDepartment($department);
         $waitScore = self::waitTimeScore($estimatedMinutes);
-        $score     = round(($urgency + $impact + $waitScore) / 3, 2);
+        $score     = round(($urgency * 0.425) + ($impact * 0.425) + ($waitScore * 0.15), 2);
 
         return [
             'score'      => $score,
