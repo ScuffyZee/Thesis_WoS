@@ -36,12 +36,19 @@ class DashboardController extends Controller
                     ->get(['id', 'order_number', 'requestor_name', 'requestor_department', 'campus', 'category', 'priority', 'created_at'])
             ),
 
-            'activeOrders' => Inertia::lazy(fn () =>
-                WorkOrder::whereIn('status', ['in_progress', 'alternative', 'contracted'])
+            'activeOrders' => Inertia::lazy(function () {
+                $user  = auth()->user();
+                $query = WorkOrder::whereIn('status', ['in_progress', 'alternative', 'contracted'])
                     ->orderBy('created_at', 'desc')
-                    ->limit(10)
-                    ->get(['id', 'order_number', 'requestor_name', 'requestor_department', 'campus', 'category', 'priority', 'status', 'assigned_to', 'created_at'])
-            ),
+                    ->limit(10);
+
+                // Tech support only sees work orders assigned to them
+                if ($user?->role === 'tech_support') {
+                    $query->where('assigned_to', $user->name);
+                }
+
+                return $query->get(['id', 'order_number', 'requestor_name', 'requestor_department', 'campus', 'category', 'priority', 'status', 'assigned_to', 'created_at']);
+            }),
         ]);
     }
 }
