@@ -40,6 +40,41 @@ const LEVEL_COLORS: Record<Priority, { badge: string; bar: string; ring: string 
     low:      { badge: 'bg-blue-500 text-white',           bar: 'bg-blue-400',   ring: 'ring-blue-200' },
 };
 
+// ─── Image compression ────────────────────────────────────────────────────────
+// Resizes and compresses images client-side before upload.
+// Target: max 1280px on the longest side, JPEG quality 0.82 — keeps camera
+// shots well under 1MB while preserving enough detail for issue reporting.
+
+function compressImage(file: File): Promise<File> {
+    return new Promise((resolve) => {
+        if (!file.type.startsWith('image/') || file.size < 200 * 1024) {
+            resolve(file);
+            return;
+        }
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+            const MAX = 1280;
+            let { width, height } = img;
+            if (width > MAX || height > MAX) {
+                if (width > height) { height = Math.round((height / width) * MAX); width = MAX; }
+                else                { width  = Math.round((width / height) * MAX); height = MAX; }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width; canvas.height = height;
+            canvas.getContext('2d')!.drawImage(img, 0, 0, width, height);
+            canvas.toBlob(
+                (blob) => resolve(blob ? new File([blob], file.name, { type: 'image/jpeg' }) : file),
+                'image/jpeg',
+                0.82,
+            );
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+        img.src = url;
+    });
+}
+
 export default function CreateWorkOrder({ campuses, categories, personnel, departments }: Props) {
     const { data, setData, post, processing, errors } = useForm<FormData>({
         requestor_name: '',
@@ -77,12 +112,13 @@ export default function CreateWorkOrder({ campuses, categories, personnel, depar
         post('/work-orders');
     }
 
-    function addFiles(files: FileList | null) {
+    async function addFiles(files: FileList | null) {
         if (!files) return;
-        const allowed   = Array.from(files).slice(0, 5 - data.images.length);
-        const newImages = [...data.images, ...allowed].slice(0, 5);
+        const allowed = Array.from(files).slice(0, 5 - data.images.length);
+        const compressed = await Promise.all(allowed.map(compressImage));
+        const newImages = [...data.images, ...compressed].slice(0, 5);
         setData('images', newImages);
-        setPreviewUrls((prev) => [...prev, ...allowed.map((f) => URL.createObjectURL(f))].slice(0, 5));
+        setPreviewUrls((prev) => [...prev, ...compressed.map((f) => URL.createObjectURL(f))].slice(0, 5));
     }
 
     function removeImage(i: number) {

@@ -106,7 +106,7 @@ class WorkOrderController extends Controller
             'urgency'              => ['required', 'integer', 'min:1', 'max:6'],
             'assigned_to'          => ['nullable', 'string', 'max:255'],
             'target_completion'    => ['nullable', 'date'],
-            'images.*'             => ['nullable', 'image', 'max:2048'],
+            'images.*'             => ['nullable', 'image', 'max:5120'],
         ]);
 
         $waitEstimate = PriorityEngine::estimateWaitTime(

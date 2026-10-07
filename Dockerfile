@@ -24,6 +24,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
+# PHP upload limits
+RUN printf "upload_max_filesize=10M\npost_max_size=15M\n" > /usr/local/etc/php/conf.d/uploads.ini
+
 # PHP extensions
 RUN docker-php-ext-configure gd \
         --with-freetype \
@@ -80,7 +83,7 @@ RUN chown -R www-data:www-data /var/www \
 
 # Nginx
 RUN mkdir -p /etc/nginx/conf.d \
-    && printf 'worker_processes auto;\npid /tmp/nginx.pid;\nerror_log /dev/stderr warn;\nevents { worker_connections 1024; }\nhttp {\n    include /etc/nginx/mime.types;\n    default_type application/octet-stream;\n    sendfile on;\n    keepalive_timeout 65;\n    access_log /dev/stdout;\n    client_body_temp_path /tmp/client_body;\n    proxy_temp_path /tmp/proxy;\n    fastcgi_temp_path /tmp/fastcgi;\n    include /etc/nginx/conf.d/*.conf;\n}\n' > /etc/nginx/nginx.conf \
+    && printf 'worker_processes auto;\npid /tmp/nginx.pid;\nerror_log /dev/stderr warn;\nevents { worker_connections 1024; }\nhttp {\n    include /etc/nginx/mime.types;\n    default_type application/octet-stream;\n    sendfile on;\n    keepalive_timeout 65;\n    access_log /dev/stdout;\n    client_max_body_size 10M;\n    client_body_temp_path /tmp/client_body;\n    proxy_temp_path /tmp/proxy;\n    fastcgi_temp_path /tmp/fastcgi;\n    include /etc/nginx/conf.d/*.conf;\n}\n' > /etc/nginx/nginx.conf \
     && printf 'server {\n    listen 10000 default_server;\n    root /var/www/public;\n    index index.php;\n    location /build/ { try_files $uri =404; expires 1y; add_header Cache-Control "public, immutable"; }\n    location /storage/ { try_files $uri =404; }\n    location / { try_files $uri $uri/ /index.php?$query_string; }\n    location ~ \\.php$ { fastcgi_pass 127.0.0.1:9000; fastcgi_index index.php; fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; include fastcgi_params; fastcgi_read_timeout 300; }\n    location ~ /\\.ht { deny all; }\n}\n' > /etc/nginx/conf.d/app.conf \
     && nginx -t
 

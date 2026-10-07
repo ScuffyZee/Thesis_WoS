@@ -37,7 +37,7 @@ class PublicRequestController extends Controller
             'description'          => ['required', 'string', 'min:10'],
             'urgency'              => ['required', 'integer', 'min:1', 'max:6'],
             'target_completion'    => ['nullable', 'date'],
-            'images.*'             => ['nullable', 'image', 'max:2048'],
+            'images.*'             => ['nullable', 'image', 'max:5120'],
         ]);
 
         // Auto-estimate wait time from category + description keywords
