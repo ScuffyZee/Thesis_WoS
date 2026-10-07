@@ -54,28 +54,29 @@ export default function AppLayout({ children, title }: Props) {
     return (
         <div className="flex min-h-screen bg-gray-100">
             {/* ── Sidebar ───────────────────────────────────────────────── */}
-            <aside className="flex w-[88px] flex-shrink-0 flex-col bg-[#1a1a2e] text-white">
+            <aside className="flex w-[180px] flex-shrink-0 flex-col bg-[#1a1a2e] text-white">
                 {/* Logo */}
-                <div className="flex items-center justify-center gap-1 border-b border-white/10 px-2 py-4">
-                    <div className="flex h-8 w-8 items-center justify-center rounded bg-[#e63946] text-xs font-bold text-white">
-                        MISO
+                <div className="flex items-center gap-2 border-b border-white/10 px-4 py-4">
+                    <img src="/images/miso-logo.png" alt="MISO" className="h-9 w-9 object-contain" />
+                    <div className="leading-tight">
+                        <span className="text-sm font-bold text-white">MISO </span>
+                        <span className="text-sm font-bold text-[#e63946]">WOS</span>
                     </div>
-                    <span className="text-xs font-bold tracking-widest text-[#e63946]">
-                        WOS
-                    </span>
                 </div>
 
-                {/* User avatar */}
-                <div className="flex flex-col items-center gap-1 border-b border-white/10 py-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500 text-sm font-semibold text-white">
+                {/* User */}
+                <div className="flex items-center gap-3 border-b border-white/10 px-4 py-4">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-500 text-sm font-semibold text-white">
                         {initials}
                     </div>
-                    <p className="max-w-[72px] truncate text-center text-[10px] font-medium leading-tight text-white">
-                        {user?.name ?? 'Zidane Llavor'}
-                    </p>
-                    <span className="rounded bg-[#e63946] px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide text-white">
-                        {auth?.role ?? 'Admin'}
-                    </span>
+                    <div className="min-w-0">
+                        <p className="truncate text-xs font-semibold text-white">
+                            {user?.name ?? 'User'}
+                        </p>
+                        <span className="mt-0.5 inline-block rounded bg-[#e63946] px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide text-white">
+                            {auth?.role ?? 'Admin'}
+                        </span>
+                    </div>
                 </div>
 
                 {/* Nav */}
@@ -90,7 +91,7 @@ export default function AppLayout({ children, title }: Props) {
                                 key={label}
                                 href={href}
                                 className={cn(
-                                    'flex flex-col items-center gap-1 rounded px-1 py-2 text-center text-[10px] leading-tight transition-colors',
+                                    'flex items-center gap-3 rounded px-3 py-2 text-xs font-medium transition-colors',
                                     active
                                         ? 'bg-[#e63946] text-white'
                                         : 'text-white/60 hover:bg-white/10 hover:text-white',

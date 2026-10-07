@@ -14,9 +14,7 @@ export default function RequestSuccess({ orderNumber }: Props) {
                 <header className="bg-[#1a1a2e] px-6 py-4 shadow-md">
                     <div className="mx-auto flex max-w-2xl items-center gap-3">
                         <div className="flex items-center gap-1">
-                            <div className="flex h-8 w-8 items-center justify-center rounded bg-[#e63946] text-xs font-bold text-white">
-                                MISO
-                            </div>
+                            <img src="/images/miso-logo.png" alt="MISO" className="h-8 w-8 object-contain" />
                             <span className="text-xs font-bold tracking-widest text-[#e63946]">WOS</span>
                         </div>
                         <div className="h-5 w-px bg-white/20" />

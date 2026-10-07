@@ -232,8 +232,8 @@ export default function WorkOrderShow({ workOrder: wo }: Props) {
                     <div className="flex items-start justify-between border-b border-gray-100 px-8 py-5">
                         {/* School logo + name */}
                         <div className="flex items-center gap-4">
-                            <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-[#e63946] bg-white">
-                                <span className="text-[10px] font-bold leading-tight text-center text-[#e63946]">SFAC</span>
+                            <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-[#e63946] bg-white overflow-hidden">
+                                <img src="/images/SFAC-Logo.png" alt="SFAC" className="h-10 w-10 object-contain" />
                             </div>
                             <div>
                                 <p className="text-sm font-bold uppercase tracking-wide text-gray-800">Saint Francis of Assisi College</p>
