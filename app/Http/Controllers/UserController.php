@@ -52,10 +52,7 @@ class UserController extends Controller
             'email'    => ['required', 'email', 'unique:users,email'],
             'phone'    => ['nullable', 'string', 'max:20'],
             'role'     => ['required', Rule::in(['admin', 'tech_support'])],
-            'password' => ['required', 'string', 'min:8'],
-        ]);
-
-        User::create($validated);
+            'password' => ['required', 'string', 'min:5'],
 
         return redirect()->route('user-accounts.index')
             ->with('success', 'User account created successfully.');
@@ -71,7 +68,7 @@ class UserController extends Controller
             'email'    => ['required', 'email', Rule::unique('users', 'email')->ignore($userAccount->id)],
             'phone'    => ['nullable', 'string', 'max:20'],
             'role'     => ['required', 'in:admin,tech_support'],
-            'password' => ['nullable', 'string', 'min:8'],
+            'password' => ['nullable', 'string', 'min:5'],
         ]);
 
         if (empty($validated['password'])) {
@@ -110,7 +107,7 @@ class UserController extends Controller
             'email'     => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
             'phone'     => ['nullable', 'string', 'max:20'],
             'username'  => ['required', 'string', 'max:50', Rule::unique('users', 'username')->ignore($user->id)],
-            'password'  => ['nullable', 'string', 'min:8'],
+            'password'  => ['nullable', 'string', 'min:5'],
             'role'      => ['required', 'in:admin,tech_support'],
             'avatar'    => ['nullable', 'image', 'max:2048'],
             'signature' => ['nullable', 'string'],

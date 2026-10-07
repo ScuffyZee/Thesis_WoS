@@ -179,7 +179,7 @@ function UserModal({
                             <ModalLabel text={isEdit ? 'New Password (leave blank to keep)' : 'Password'} required={!isEdit ? false : undefined} />
                             <input type="password" value={data.password}
                                 onChange={(e) => setData('password', e.target.value)}
-                                placeholder={isEdit ? '••••••••' : 'Min. 8 characters'}
+                                placeholder={isEdit ? '••••••••' : 'Min. 5 characters'}
                                 className={modalInput(!!errors.password)} />
                             <ModalError msg={errors.password} />
                         </div>
