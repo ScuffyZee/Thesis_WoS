@@ -225,7 +225,7 @@ export default function MyProfile({ user }: Props) {
                                         type="text"
                                         value={data.first_name}
                                         onChange={(e) => setData('first_name', e.target.value)}
-                                        className={inputCls(!!errors.name)}
+                                        className={inputCls(!!errors.first_name)}
                                     />
                                 </div>
                                 <div>

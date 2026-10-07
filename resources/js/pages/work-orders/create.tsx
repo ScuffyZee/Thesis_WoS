@@ -56,6 +56,8 @@ export default function CreateWorkOrder({ campuses, categories, personnel, depar
     const [dragOver, setDragOver]       = useState(false);
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
     const fileInputRef                  = useRef<HTMLInputElement>(null);
+    const cameraInputRef                = useRef<HTMLInputElement>(null);
+    const isMobile                      = typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0;
 
     // Auto-estimate wait from category + description
     const waitEstimate = data.category
@@ -250,18 +252,46 @@ export default function CreateWorkOrder({ campuses, categories, personnel, depar
                         <SectionHeader label="Image Attachments" />
                         <div className="px-6 pt-4 pb-6">
                             <Label text="Upload Images (Max: 5 only)" />
-                            <div
-                                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                                onDragLeave={() => setDragOver(false)}
-                                onDrop={(e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setDragOver(false); addFiles(e.dataTransfer.files); }}
-                                onClick={() => fileInputRef.current?.click()}
-                                className={cn('mt-1 flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-6 py-8 transition-colors',
-                                    dragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-gray-50 hover:border-gray-300')}>
-                                <UploadIcon className="mb-2 h-8 w-8 text-gray-300" />
-                                <p className="text-xs text-gray-500"><span className="font-semibold text-blue-500">Upload a file</span> or drag and drop</p>
-                                <p className="mt-0.5 text-[10px] text-gray-400">PNG, JPG, JPEG, GIF, WEBP up to 2MB each</p>
-                            </div>
+                            {/* On mobile: show camera + gallery buttons. On desktop: drag-and-drop zone. */}
+                            {isMobile ? (
+                                <div className="mt-1 flex gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => cameraInputRef.current?.click()}
+                                        disabled={data.images.length >= 5}
+                                        className="flex flex-1 items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 py-5 text-xs font-semibold text-gray-600 transition-colors hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        <CameraIcon className="h-5 w-5 text-gray-400" />
+                                        Take Photo
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        disabled={data.images.length >= 5}
+                                        className="flex flex-1 items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 py-5 text-xs font-semibold text-gray-600 transition-colors hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        <UploadIcon className="h-5 w-5 text-gray-400" />
+                                        Choose File
+                                    </button>
+                                </div>
+                            ) : (
+                                <div
+                                    onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                                    onDragLeave={() => setDragOver(false)}
+                                    onDrop={(e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setDragOver(false); addFiles(e.dataTransfer.files); }}
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className={cn('mt-1 flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-6 py-8 transition-colors',
+                                        dragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-gray-50 hover:border-gray-300')}>
+                                    <UploadIcon className="mb-2 h-8 w-8 text-gray-300" />
+                                    <p className="text-xs text-gray-500"><span className="font-semibold text-blue-500">Upload a file</span> or drag and drop</p>
+                                    <p className="mt-0.5 text-[10px] text-gray-400">PNG, JPG, JPEG, GIF, WEBP up to 2MB each</p>
+                                </div>
+                            )}
+
+                            {/* Hidden file inputs */}
                             <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden"
+                                onChange={(e: ChangeEvent<HTMLInputElement>) => addFiles(e.target.files)} />
+                            <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden"
                                 onChange={(e: ChangeEvent<HTMLInputElement>) => addFiles(e.target.files)} />
 
                             {previewUrls.length > 0 && (
@@ -345,6 +375,10 @@ function ChevronLeftIcon({ className }: { className?: string }) {
 }
 function UploadIcon({ className }: { className?: string }) {
     return <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>;
+}
+
+function CameraIcon({ className }: { className?: string }) {
+    return <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.776 48.776 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" /></svg>;
 }
 function SparkleIcon({ className }: { className?: string }) {
     return <svg className={className} fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" /></svg>;
