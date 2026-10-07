@@ -53,6 +53,9 @@ class UserController extends Controller
             'phone'    => ['nullable', 'string', 'max:20'],
             'role'     => ['required', Rule::in(['admin', 'tech_support'])],
             'password' => ['required', 'string', 'min:5'],
+        ]);
+
+        User::create($validated);
 
         return redirect()->route('user-accounts.index')
             ->with('success', 'User account created successfully.');
