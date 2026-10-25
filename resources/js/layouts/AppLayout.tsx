@@ -8,10 +8,10 @@ import { router } from '@inertiajs/react';
 const NAV_ITEMS = [
     { label: 'Dashboard', href: '/dashboard', icon: DashboardIcon },
     { label: 'Work Orders', href: '/work-orders', icon: WorkOrderIcon },
-    { label: 'MISO Inventory', href: '#', icon: InventoryIcon },
-    { label: 'MISO Repository', href: '#', icon: RepositoryIcon },
+    { label: 'MISO Inventory', href: '/miso-inventory', icon: InventoryIcon },
+    { label: 'MISO Repository', href: '/miso-repository', icon: RepositoryIcon },
     { label: 'User Accounts', href: '/user-accounts', icon: UsersIcon },
-    { label: 'System Config', href: '#', icon: SettingsIcon },
+    { label: 'System Config', href: '/system-config', icon: SettingsIcon },
     { label: 'My Profile', href: '/my-profile', icon: ProfileIcon },
 ] as const;
 

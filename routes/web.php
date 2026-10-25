@@ -73,6 +73,11 @@ Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
+    // Placeholder pages
+    Route::get('/miso-inventory', fn () => inertia('under-construction', ['page' => 'MISO Inventory']))->name('inventory');
+    Route::get('/miso-repository', fn () => inertia('under-construction', ['page' => 'MISO Repository']))->name('repository');
+    Route::get('/system-config', fn () => inertia('under-construction', ['page' => 'System Config']))->name('system-config');
+
     // Work Orders
     Route::prefix('work-orders')->name('work-orders.')->group(function () {
         Route::get('/',                          [WorkOrderController::class, 'index'])->name('index');
