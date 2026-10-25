@@ -26,6 +26,9 @@ php artisan cache:clear || true
 echo "==> Running database migrations..."
 php artisan migrate --force --no-interaction
 
+echo "==> Seeding default users..."
+php artisan db:seed --force --no-interaction
+
 echo "==> Creating storage link..."
 php artisan storage:link 2>/dev/null || true
 
